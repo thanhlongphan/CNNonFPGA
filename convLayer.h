@@ -15,4 +15,4 @@ typedef struct{
     float* bias;
 }convLayer;
 
-void ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int stride, int padding, int filterSize);
+convLayer* ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int stride, int padding, int filterSize);
