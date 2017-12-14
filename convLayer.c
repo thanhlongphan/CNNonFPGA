@@ -44,7 +44,7 @@ convLayer* ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int s
             }
         }
   }
-  
+  //https://stats.stackexchange.com/questions/200513/how-to-initialize-the-elements-of-the-filter-matrix
   
   //TODO output map
     
