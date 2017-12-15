@@ -37,8 +37,9 @@ convLayer* ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int s
                     conv->filter[i][j][k] = &(conv->filter[0][0][0][i * conv->inputDepth * conv->filterSize * conv->filterSize +
                                              j * conv->filterSize * conv->filterSize + k * conv->filterSize]);
                 }
+               // initialisiere Filter mit Random-Werten zwischen 0 und 1
                 for (l = 0; l < res->filterSize; l++) {
-                    res->filter[i][j][k][l] = distribution(generator) / sqrt(inputDepth * filterSize * filterSize); // initialisiere Filter mit Random-Werten zwischen 0 und 1
+                    res->filter[i][j][k][l] = distribution(generator) / sqrt(inputDepth * filterSize * filterSize);
                     
                 }
             }
