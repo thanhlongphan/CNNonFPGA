@@ -12,11 +12,11 @@ typedef struct{
     int outputWidth;
     int outputDepth;
     int filterSize;
-    float**** filter
+    float*** filter // 3x3x3 filter
     int stride;
     int padding;
     float* bias;
     
 }convLayer;
 
-convLayer* ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int stride, int padding, int filterSize, int filterCount);
+convLayer* ConvLayerSetup(int inputHeight, int inputDepth, int inputWidth, int stride, int padding, int filterSize);
