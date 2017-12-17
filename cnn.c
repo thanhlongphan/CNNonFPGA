@@ -11,6 +11,7 @@ using namespace std;
 
 #define FILTER_DEPTH 3
 #define FILTER_SIZE 5
+#define DEFAULT_STRIDE 1
 default_random_engine generator;
 normal_distribution<float> distribution(0.0, RANDOM_NORMAL_STDDEV);
 /*  5x5x3 filter
@@ -34,24 +35,24 @@ typedef struct{
 }conlayer;
 
 
-conlayer* makeConlayer(int inputHeight, int inputWidth, int inputDepth, int nextLayerPadding, int stride){
-    conlayer *res = (conlayer*)malloc(sizeof(conlayer));
-    res->inputWidth = inputWidth;
-    res->inputDepth = inputDepth;
-    res->inputHeight = inputHeight;
-    res->filterDepth = FILTER_DEPTH;
-    res->filterSize = FILTER_SIZE;
-    res->outputDepth = FILTER_DEPTH;
-    res->stride = stride;
-    res->outputHeight = (res->inputHeight - res->filterSize)/res->stride +1;
-    res->outputWidth = (res->inputWidth - res->filterSize)/res->stride +1;
-    res->next_layer_padding = nextLayerPadding;
+conlayer* makeConlayer(int inputHeight, int inputWidth, int inputDepth, int padding){
+    conlayer *conv = (conlayer*)malloc(sizeof(conlayer));
+    conv->inputWidth = inputWidth;
+    conv->inputDepth = inputDepth;
+    conv->inputHeight = inputHeight;
+    conv->filterDepth = FILTER_DEPTH;
+    conv->filterSize = FILTER_SIZE;
+    conv->outputDepth = FILTER_DEPTH;
+    conv->stride = DEFAULT_STRIDE;
+    conv->outputHeight = (conv->inputHeight - conv->filterSize)/conv->stride +1;
+    conv->outputWidth = (conv->inputWidth - conv->filterSize)/conv->stride +1;
+    conv->padding = padding;
     //initialize filter random
     res->filter = (float***)malloc(sizeof(float**)*res->stride+1);
-    for(int i=0; i<res->filterDepth;i++){
-        for(int j=0;j<res->filterSize;j++){
-            for(int k=0;k<res->filterSize;k++){
-                res->filter[k][j][i] = distribution(generate)/sqrt(inputDepth*filterWidth*filterWidth);
+    for(int i=0; i<conv->filterDepth;i++){
+        for(int j=0;j<conv->filterSize;j++){
+            for(int k=0;k<conv->filterSize;k++){
+                conv->filter[k][j][i] = distribution(generate)/sqrt(inputDepth*filterWidth*filterWidth);
             }
         }
     }
@@ -59,9 +60,9 @@ conlayer* makeConlayer(int inputHeight, int inputWidth, int inputDepth, int next
 
 
     //bias
-    res->bias = (float*)calloc(res->outputDepth, sizeof(float));
-    for (int i = 0; i < res->outputDepth; i++) {
-        res->bias[i] = DEFAULT_BIAS;
+    conv->bias = (float*)calloc(conv->outputDepth, sizeof(float));
+    for (int i = 0; i < conv->outputDepth; i++) {
+        conv->bias[i] = DEFAULT_BIAS;
     }
 
 
