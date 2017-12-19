@@ -95,6 +95,6 @@ convolution *makeConv(inputImage *img, int stride, int filterSize)
   return conv;
 }
 
-int convCalculate(inputImage *img, feature_map *fm, int filterSize){
+int convCalculate(inputImage *img, feature_map *fm, int filterSize, int stride){
   //TODO
 }
