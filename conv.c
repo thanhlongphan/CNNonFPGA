@@ -14,18 +14,22 @@ typedef struct feature_map {
   int width;
   DTYPE ***data;
 }feature_map;
-
+//input map
 typedef struct inputImage {
   int height;
   int depth;
   int width;
   DTYPE ***data;
 }inputImage;
-
-
+//filter
+typedef struct {
+  int filterSize;
+  int filterDepth;
+  DTYPE ***data;
+}filter;
 //conv layer struktor
 typedef struct convolution {
-  DTYPE ***filter;
+  filter *filter;
   int filterSize;
   feature_map *fm;
   int inputHeight;
@@ -56,7 +60,6 @@ convolution *makeConv(inputImage ***img, int stride, int filterSize)
   conv->inputWidth = img->width;
   conv->outputDepth = img->depth;
   conv->stride = stride;
-  conv->filterSize = filterSize;
   //berechnet outputWidth und outputHeight
   conv->outputWidth = (conv->inputWidth - conv->filterSize) / conv->stride + 1; //hier ist padding gleich 0
   conv->outputHeight = (conv->inputHeight - conv->filterSize) / conv->stride + 1; //hier ist padding gleich 0;
@@ -64,6 +67,8 @@ convolution *makeConv(inputImage ***img, int stride, int filterSize)
   feature_map* fm = init_fmaps(conv->outputDept, conv->outputWidth, conv->outputHeight);
   conv->fm = fm;
   //initialisiere filter mit zufälligen Zahlen zwischen 0 und 1
+  conv->filter->filterSize = filterSize;
+  conv->filter->filterDepth = conv->inputDepth;
   conv->filter = (DTYPE***)malloc(sizeof(DTYPE**) * conv->inputDepth);  //Speicher reservieren
   //depth
   for(int i = 0 ; i < conv->outputDepth ; i++) {
@@ -71,7 +76,7 @@ convolution *makeConv(inputImage ***img, int stride, int filterSize)
     for(int j = 0 ; j < conv->filterSize ; j++) {
       //width
       for(int k = 0 ; k < conv->filterSize ; k++) {
-        conv->filter[i][j][k] = distribution(generator);
+        conv->filter->data[i][j][k] = distribution(generator);
       }
     }
   }
@@ -100,7 +105,7 @@ feature_map *convCalculate(inputImage ***img, convolution* conv ){
             }
           }
         }
-        conv->fm[dep][height][width] = sum + conv->bias[dep];
+        conv->fm->data[dep][height][width] = sum + conv->bias[dep];
       }
     }
   }
