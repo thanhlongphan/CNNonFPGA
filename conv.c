@@ -12,28 +12,17 @@ normal_distribution<float> distribution(0.0, RANDOM_NORMAL_STDDEV);
 typedef struct feature_map {
   int height;
   int width;
-  DTYPE *data;
+  DTYPE ***data;
 }feature_map;
 
 typedef struct inputImage {
   int height;
   int depth;
   int width;
-  DTYPE *data;
+  DTYPE ***data;
 }inputImage;
 
-struct data {
-	int w;
-	int h;
-	double *data;
-}data;
-/*
-typedef struct filter {
-  int width; // filter size
-  DTYPE *data;
-  int *inp; //verstehe nicht , was ist das denn
-}filter;
-*/
+
 //conv layer struktor
 typedef struct convolution {
   DTYPE ***filter;
@@ -59,7 +48,7 @@ feature_map* init_fmaps(int depth, int width, int height){
   return fm;
 }
 
-convolution *makeConv(inputImage *img, int stride, int filterSize)
+convolution *makeConv(inputImage ***img, int stride, int filterSize)
 //convolution *makeConv(int inputDepth, int inputHeight, int inputWidth, int stride, int filterSize){
   convolution* conv = (convolution*)malloc(sizeof(convolution));  //Speicher reservieren
   conv->inputDepth = img->depth;
@@ -95,6 +84,25 @@ convolution *makeConv(inputImage *img, int stride, int filterSize)
   return conv;
 }
 
-int convCalculate(inputImage *img, feature_map *fm, int filterSize, int stride){
-  //TODO
+//convCalculate berechnet feature_map einer inputImage
+
+feature_map *convCalculate(inputImage ***img, convolution* conv ){
+  feature_map *fmap = (feature_map*)malloc(sizeof(feature_map));
+  int stride = conv->stride;
+  for(int dep = 0 ; dep < conv->outputDept, dep++) {
+    for(int height = 0 ; height < conv->outputHeight ; height++) {
+      for(int width = 0 ; width < conv->outputWidth ; width++) {
+        DTYPE sum = 0;
+        for(int i = 0 ; i < conv->inputDepth ; i++ ) {
+          for(int j = 0 ; j < conv->filterSize ; j++) {
+            for(int k = 0 ; k < conv->filterSize ; k++) {
+              sum += conv->filter[i][j][k]*img[i][height*stride+j][width*stride+k];
+            }
+          }
+        }
+        conv->fm[dep][height][width] = sum + conv->bias[dep];
+      }
+    }
+  }
+  fmap = conv->fm;
 }
