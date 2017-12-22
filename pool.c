@@ -51,3 +51,25 @@ poolLayer* make_pool_layer(convolution *conv, int pool) {
     }
     return pl;
 }
+                                              
+void pool_forward(inputImage *img, poolLayer *pl) {
+  int pool = pl->pool;
+  DTYPE max;
+  for(int dep = 0; dep < pl->outputDepth ; dep++) {
+    for(int h = 0 ; h < pl->outputHeight ; h++) {
+      for(int w = 0 ; w < pl->outputWidth ; w++) {
+        max = 0;
+        for(int i = h*pool ; i< (h+1)*pool ; i++) {
+          for(int j = w*pool ; j < (w+1)*pool ; j++) {
+            DTYPE value = img->data[dep][i][j];
+            if(value > max) {
+              max = value;
+            }
+          }
+        }
+        pl->fm->data[dep][h][w] = max;
+      }
+    }
+  }
+}
+                                              
