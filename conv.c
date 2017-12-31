@@ -130,6 +130,7 @@ feature_map *convCalculate(inputImage ***img, convolution* conv ){
   for(int dep = 0 ; dep < conv->outputDept, dep++) {
     for(int height = 0 ; height < conv->outputHeight ; height++) {
       for(int width = 0 ; width < conv->outputWidth ; width++) {
+          
         DTYPE sum = 0;
         for(int i = 0 ; i < conv->inputDepth ; i++ ) {
           for(int j = 0 ; j < conv->filterSize ; j++) {
@@ -139,6 +140,9 @@ feature_map *convCalculate(inputImage ***img, convolution* conv ){
           }
         }
         conv->fm->data[dep][height][width] = sum + conv->bias[dep];
+        if(conv->data->fm[dep][height][width] < 0) {
+            conv->data->fm[dep][height][width] = 0;
+        }
       }
     }
   }
