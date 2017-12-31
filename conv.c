@@ -8,6 +8,14 @@ typedef double DTYPE;
 default_random_engine generator;
 normal_distribution<float> distribution(0.0, RANDOM_NORMAL_STDDEV);
 
+inline double rmse(DTYPE output, int desiredOut) {
+    return (pow(desiredOut - output, 2)) / 2;
+}
+
+inline double rmseD(DTYPE output, int desiredOut) {
+    return (output - desiredOut);
+}
+
 //output map
 typedef struct feature_map {
   int height;
@@ -25,21 +33,23 @@ typedef struct inputImage {
 typedef struct {
   int filterSize;
   int filterDepth;
-  DTYPE ***data;
+  DTYPE*** data;
 }filter;
 //conv layer struktor
 typedef struct convolution {
-  filter *filter;
+  filter* filter;
   int filterSize;
-  feature_map *fm;
+  feature_map* fm;
   int inputHeight;
   int inputWidth;
   int inputDepth;
   int outputDepth;
   DTYPE *bias;
   int stride;
-  //ich würde gern keine Zero padding benutzen
-  //int padding;
+  int padding;
+  
+  double(*lossF)(DTYPE, int);
+  double(*lossD)(DTYPE, int);
 }convolution;
 
 
@@ -52,20 +62,41 @@ feature_map* init_fmaps(int depth, int width, int height){
   return fm;
 }
 
-convolution *makeConv(inputImage ***img, int stride, int filterSize)
-//convolution *makeConv(int inputDepth, int inputHeight, int inputWidth, int stride, int filterSize){
+convolution *makeConv(int inputDepth, int inputHeight, int inputWidth, int stride, int filterSize, int padding, char actChoice, char lossChoice){
   convolution* conv = (convolution*)malloc(sizeof(convolution));  //Speicher reservieren
   conv->inputDepth = img->depth;
   conv->inputHeight = img->height;
   conv->inputWidth = img->width;
   conv->outputDepth = img->depth;
   conv->stride = stride;
+  conv->padding = padding;
   //berechnet outputWidth und outputHeight
-  conv->outputWidth = (conv->inputWidth - conv->filterSize) / conv->stride + 1; //hier ist padding gleich 0
-  conv->outputHeight = (conv->inputHeight - conv->filterSize) / conv->stride + 1; //hier ist padding gleich 0;
+  conv->outputWidth = (conv->inputWidth - conv->filterSize + 2*padding) / conv->stride + 1; 
+  conv->outputHeight = (conv->inputHeight - conv->filterSize +2*padding) / conv->stride + 1;
   //initialisiere output map (feature_map)
-  feature_map* fm = init_fmaps(conv->outputDept, conv->outputWidth, conv->outputHeight);
-  conv->fm = fm;
+  conv->fm = (feature_map*)malloc(sizeof(feature_map) * conv->outputDepth);
+    for (int f = 0; fm < conv->outputDepth; f++) {
+        if (f == 0) {
+            conv->fm->data[0] = (DTYPE**)malloc(sizeof(DTYPE*) * conv->outputDepth * (conv->outputWidth + 2 * conv->padding));
+        }
+        else {
+            conv->fm->data[f] = &(conv->fm->data[0][f * (conv->outputWidth + 2 * conv->padding)]);
+        }
+        for (int j = 0; j < conv->outputWidth + 2 * conv->padding; j++) {
+            // use a single coherent array
+            if (f == 0 && j == 0) {
+
+                conv->fm->data[0][0] = (DTYPE*)calloc(conv->outputDepth * (conv->outputWidth + 2 * conv->padding) *
+                                                (conv->outputWidth + 2 * conv->padding), sizeof(DTYPE));
+            }
+            // point to beginnings
+            else {
+                conv->fm->data[f][j] = &(conv->fm->data[0][0][f * (conv->outputWidth + 2 * conv->padding) * (conv->outputWidth + 2 * conv->padding)
+                                                     + j * (conv->outputWidth + 2 * conv->padding)]);
+            }
+        }
+    }
+
   //initialisiere filter mit zufälligen Zahlen zwischen 0 und 1
   conv->filter->filterSize = filterSize;
   conv->filter->filterDepth = conv->inputDepth;
@@ -85,7 +116,9 @@ convolution *makeConv(inputImage ***img, int stride, int filterSize)
   for( int i = 0 ; i < conv->outputDepth ; i++) {
     conv->bias[i] = 0.1; //DEFAULT BIAS 0.1
   }
-
+  
+  conv->lossF = rmse;
+  conv->lossD = rmseD;
   return conv;
 }
 
