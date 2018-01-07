@@ -35,26 +35,26 @@ int main() {
       }
       else {
         int i;
-        int red = 0;
+        int red = 0;                      // Jede Farbe hat einen eigenen Pixelzaehler
         int green = 0;
         int blue = 0;
         for(i=0; i<number_of_images*12288; i++){
-          if(red == 4096) {red = 0;}
-          if(green == 4096) {green = 0;}
+          if(red == 4096) {red = 0;}      // Wenn red, green oder blue auf 4096 ist,
+          if(green == 4096) {green = 0;}  // ist ein Bild zuende und das nächste beginnt
           if(blue == 4096) {blue = 0;}
-          int img_no = (int)i/12288;
-          int color = (i % 3);
-          if(color == 0) {
+          int img_no = (int)i/12288;      // Alle 12288 Pixel beginnt ein neues Bild
+          int color = (i % 3);            // Die Farbwerte haben die Reihenfolge RGB, also bestimmt modulo 3 die Farbe
+          if(color == 0) {                // Wenn das Ergebnis von Modulo 0 ist, ist die Farbe rot
             //printf("%d, %d, %d  ", img_no, color, red);
             images[img_no][color][red] = (int)buffer[i];
             red++;
           }
-          if(color == 1) {
+          if(color == 1) {                // Wenn das Ergebnis von Modulo 1 ist, ist die Farbe grün
             //printf("%d, %d, %d  ", img_no, color, green);
             images[img_no][color][green] = (int)buffer[i];
             green++;
           }
-          if(color == 2) {
+          if(color == 2) {                // Wenn das Ergebnis von Modulo 2 ist, ist die Farbe blau
             //printf("%d, %d, %d  ", img_no, color, blue);
             images[img_no][color][blue] = (int)buffer[i];
             blue++;
@@ -62,7 +62,7 @@ int main() {
         }
       }
 
-      //print_images(images);
+      //print_images(images);             // Ausgabe zur Überprüfung
 
       fclose(fp);
       free(buffer);
